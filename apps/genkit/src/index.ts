@@ -427,3 +427,58 @@ export const githubGrillerFunction = onCallGenkit(
   },
   githubGrillerFlow,
 );
+
+// New: A flow that analyzes the user's languages and suggests a next project
+const githubProjectSuggestFlow = ai.defineFlow(
+  {
+    name: 'githubProjectSuggestFlow',
+    inputSchema: z.object({
+      username: z.string(),
+    }),
+    outputSchema: z.string(),
+  },
+  async ({ username }, streamCallack) => {
+    const { response, stream } = ai.generateStream({
+      prompt: `
+        You are a thoughtful, encouraging senior engineer career mentor.
+
+        Task: Given the GitHub username "${username}", use the available tools to:
+        1) Identify their top programming languages and recency of work (repos and pushed_at)
+        2) Note any gaps between what they star and what they build
+        3) Propose ONE concrete project they should build next that fits their current skills while stretching them a bit.
+
+        Requirements for the output (short, actionable, no fluff):
+        - Title: a catchy project title
+        - Why: 1–2 sentences tying it to their top languages/experience
+        - Key Features: 3–5 bullet points
+        - Tech Stack: list primary languages/frameworks to use (from their strengths + 1 stretch)
+        - Next Steps: 3–4 steps to get started
+
+        Keep it under 180 words. Return only the suggestion text as a single string.
+      `,
+      tools: [
+        fetchGithubUserProfile,
+        fetchGithubRepos,
+        fetchLanguageStats,
+        fetchStarredRepos,
+      ],
+      config: {
+        temperature: 0.6,
+      },
+    });
+
+    for await (const chunk of stream) {
+      streamCallack(chunk);
+    }
+
+    const { text } = await response;
+    return text;
+  },
+);
+
+export const githubProjectSuggestFunction = onCallGenkit(
+  {
+    secrets: [githubToken, geminiApiKey],
+  },
+  githubProjectSuggestFlow,
+);
