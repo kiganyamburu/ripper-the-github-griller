@@ -27,32 +27,11 @@
           />
         </svg>
       </span>
-      <span> Ripper - The Github Griller </span>
+      <span> Project Suggestor </span>
     </h1>
     <p class="mb-4 text-white font-semibold text-center py-3">
-      Enter your GitHub username. Choose Roast for a spicy take, or Suggest to
-      get a tailored next project.
+      Enter your GitHub username to get a tailored next project idea powered by Gemini.
     </p>
-    <div class="flex items-center justify-center gap-3 mb-4">
-      <button
-        type="button"
-        (click)="mode.set('roast')"
-        class="px-3 py-1 rounded border text-sm"
-        [class.bg-purple-700]="mode()==='roast'"
-        [class.border-purple-500]="mode()==='roast'"
-      >
-        Roast
-      </button>
-      <button
-        type="button"
-        (click)="mode.set('suggest')"
-        class="px-3 py-1 rounded border text-sm"
-        [class.bg-purple-700]="mode()==='suggest'"
-        [class.border-purple-500]="mode()==='suggest'"
-      >
-        Suggest
-      </button>
-    </div>
     <div class="flex flex-col gap-4 mb-6">
       <input
         type="text"
@@ -64,12 +43,12 @@
         #username="ngModel"
       />
       <button
-        [disabled]="!username.valid || roastMutations.isPending() || suggestMutations.isPending()"
-        (click)="mode()==='roast' ? roastMutations.mutate(username.value) : suggestMutations.mutate(username.value)"
+        [disabled]="!username.valid || suggestMutations.isPending()"
+        (click)="suggestMutations.mutate(username.value)"
         type="submit"
         class="bg-purple-700 hover:bg-purple-900 text-white cursor-pointer font-bold py-2 rounded transition-colors duration-200 shadow-md flex items-center justify-center gap-2"
       >
-        @if (roastMutations.isPending() || suggestMutations.isPending()) {
+        @if (suggestMutations.isPending()) {
         <span class="animate-spin">
           <!-- Spinning gear SVG -->
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -97,7 +76,7 @@
             </path>
           </svg>
         </span>
-        <span>Roasting...</span>
+        <span>Generating...</span>
         } @else {
         <span class="flex items-center gap-2">
           <!-- Fire SVG -->
@@ -111,7 +90,7 @@
               fill="#fbbf24"
             />
           </svg>
-          {{ mode()==='roast' ? 'Roast Me' : 'Suggest Project' }}
+          Suggest Project
           <!-- Ghost SVG -->
           <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none">
             <path
@@ -125,22 +104,13 @@
         }
       </button>
     </div>
-    @let roastResult = roastMutations.data(); @let suggestion =
-    suggestionText();
-
-    <!-- hello -->
-    @if (roastResult && mode()==='roast') {
-    <app-roast-card
-      [results]="roastResult"
-      [isModalOpen]="isRoastCardOpen()"
-      (modalClosed)="closeRoastCard()"
-    />
-    } @if (suggestion && mode()==='suggest') {
-    <app-roast-card
-      [results]="suggestion"
-      [isModalOpen]="isRoastCardOpen()"
-      (modalClosed)="closeRoastCard()"
-    />
+    @let suggestion = suggestionText();
+    @if (suggestion) {
+      <app-suggest-card
+        [results]="suggestion"
+        [isModalOpen]="isRoastCardOpen()"
+        (modalClosed)="closeRoastCard()"
+      />
     }
   </div>
   <footer

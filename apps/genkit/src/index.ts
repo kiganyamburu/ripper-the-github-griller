@@ -22,33 +22,7 @@ const repoSchema = z.object({
   forks: z.number(),
 });
 
-const githubEventSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  repo: z.object({
-    id: z.number(),
-    name: z.string(),
-    url: z.string(),
-  }),
-  payload: z.object({
-    commits: z
-      .array(
-        z.object({
-          sha: z.string(),
-          author: z.object({
-            email: z.string(),
-            name: z.string(),
-          }),
-          message: z.string(),
-          distinct: z.boolean(),
-          url: z.string(),
-        }),
-      )
-      .optional(),
-  }),
-});
-
-const githubEventsArraySchema = z.array(githubEventSchema);
+// (Removed event schemas previously used for roasting commit messages)
 
 const fetchGithubRepos = ai.defineTool(
   {
@@ -238,47 +212,7 @@ const fetchStarredRepos = ai.defineTool(
   },
 );
 
-const fetchCommitMessages = ai.defineTool(
-  {
-    name: 'fetchCommitMessages',
-    description:
-      'Fetches commit messages from the last 100 events of a GitHub user.',
-    inputSchema: z.object({
-      username: z.string(),
-    }),
-    outputSchema: z.array(z.string()),
-  },
-  async ({ username }) => {
-    const response = await fetch(
-      // https://api.github.com/users/mainawycliffe/events
-      `https://api.github.com/users/${username}/events?per_page=100`, // Fetch the last 100 events
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'Genkit-Repo-Roaster-Agent',
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch commit messages from GitHub: ${response.statusText}`,
-      );
-    }
-
-    const commits = await response.json();
-    const commitsParsed = githubEventsArraySchema.parse(commits);
-    console.log({ commitsParsed });
-    return (
-      commitsParsed
-        // Filter for PushEvent type and extract commit messages
-        .filter((event) => event.type === 'PushEvent')
-        .map((commit) => commit.payload.commits.map((c) => c.message))
-        .flat()
-    );
-  },
-);
+// (Removed commit messages tool that supported roasting)
 
 const fetchGithubUserProfile = ai.defineTool(
   {
@@ -340,93 +274,7 @@ const fetchGithubUserProfile = ai.defineTool(
   },
 );
 
-const githubGrillerFlow = ai.defineFlow(
-  {
-    name: 'githubGrillerFlow',
-    inputSchema: z.object({
-      username: z.string(),
-    }),
-    outputSchema: z.string(),
-  },
-  async ({ username }, streamCallack) => {
-    const { response, stream } = ai.generateStream({
-      prompt: `
-          You are a witty, sarcastic, and expert code reviewer. Your name is "Ripper - The Roast master".
-          
-          Your task is to write a short, funny roast of a developer based on their public GitHub profile and activity.
-
-          Be playful and clever, not truly mean (but also, don't hold back). Keep it short and punchy, around 3-5 sentences.
-
-          Here's the Github Username: "${username}". 
-          
-          Using the provided tools, you will fetch their GitHub profile, repositories, commit messages, language statistics, and starred repositories, then roast them based on all this information.
-
-          Roast them! Consider these angles:
-          
-          **Profile-based roasts:**
-          - Cringe bio or lack thereof
-          - Follower-to-following ratio (are they desperately following everyone?)
-          - Generic or pretentious company names
-          - Blog links that don't work or lead to abandoned WordPress sites
-          - Account age vs activity (old account, no contributions?)
-          - Location-based stereotypes (if appropriate and not offensive)
-          
-          **Repository-based roasts:**
-          - Too many unfinished projects (look at the 'pushed_at' dates)
-          - Weird or unoriginal repository names
-          - A graveyard of forked repos with no original work
-          - Complete lack of stars or engagement
-          - Tutorial follow-alongs disguised as "projects"
-          
-          **Language Statistics roasts:**
-          - Over-reliance on one language (e.g., "99% JavaScript - we get it, you're 'full-stack'")
-          - Language choices that don't match their aspirations
-          - Trendy language hopping without depth
-          
-          **Starred Repository roasts:**
-          - Stars advanced ML/AI repos but only creates basic CRUD apps
-          - Thousands of stars but zero original contributions
-          - Starring pattern reveals their unrealistic ambitions vs actual skill level
-          - Stars everything but contributes to nothing
-          
-          **Commit-based roasts:**
-          - Terrible commit messages ("fixed stuff", "asdf", ".")
-          - Inconsistent coding patterns
-          - Too many "fix" commits in a row
-
-          You only have one task: roast the developer based on their GitHub activity and profile information, and keep it short and punchy, around 3-5 sentences.
-
-          Return the roast as a single string, no other text or explanation needed.
-      `,
-      tools: [
-        fetchGithubRepos,
-        fetchCommitMessages,
-        fetchGithubUserProfile,
-        fetchLanguageStats,
-        fetchStarredRepos,
-      ],
-      config: {
-        temperature: 0.8,
-      },
-    });
-
-    for await (const chunk of stream) {
-      streamCallack(chunk);
-    }
-
-    const { text } = await response;
-    console.log({ text });
-
-    return text;
-  },
-);
-
-export const githubGrillerFunction = onCallGenkit(
-  {
-    secrets: [githubToken, geminiApiKey],
-  },
-  githubGrillerFlow,
-);
+// (Removed roast flow and callable export)
 
 // New: A flow that analyzes the user's languages and suggests a next project
 const githubProjectSuggestFlow = ai.defineFlow(
