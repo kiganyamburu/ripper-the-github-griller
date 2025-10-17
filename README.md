@@ -35,23 +35,27 @@ A Gemini-powered web app that analyzes your GitHub profile and suggests personal
 ### Installation
 
 1. Clone the repo:
+
 ```bash
 git clone https://github.com/kiganyamburu/ripper-the-github-griller.git
 cd ripper-the-github-griller
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Set up Firebase secrets (for production):
+
 ```bash
 firebase functions:secrets:set GEMINI_API_KEY
 firebase functions:secrets:set GITHUB_TOKEN
 ```
 
 4. For local development, create `apps/genkit/.env`:
+
 ```
 GEMINI_API_KEY=your_gemini_api_key
 GITHUB_TOKEN=your_github_token
@@ -60,16 +64,19 @@ GITHUB_TOKEN=your_github_token
 ### Running Locally
 
 **Web app (development):**
+
 ```bash
 pnpm nx serve web
 ```
 
 **Firebase Functions emulator:**
+
 ```bash
 pnpm nx serve genkit
 ```
 
 **Build for production:**
+
 ```bash
 pnpm nx build web
 pnpm nx build genkit
@@ -78,6 +85,7 @@ pnpm nx build genkit
 ### Deployment
 
 Deploy Firebase Functions:
+
 ```bash
 pnpm nx run genkit:deploy
 ```

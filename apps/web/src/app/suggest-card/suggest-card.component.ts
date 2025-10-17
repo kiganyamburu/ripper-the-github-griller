@@ -41,7 +41,9 @@ export class SuggestCardComponent {
             const file = new File([blob], 'project-suggestion.png', {
               type: 'image/png',
             });
-            (navObj as unknown as { share: (data: ShareData) => Promise<void> }).share({
+            (
+              navObj as unknown as { share: (data: ShareData) => Promise<void> }
+            ).share({
               title: 'GitHub Project Suggestion',
               text: 'Check out this project idea tailored to my GitHub profile!',
               files: [file],
