@@ -327,6 +327,7 @@ const githubProjectSuggestFlow = ai.defineFlow(
 export const githubProjectSuggestFunction = onCallGenkit(
   {
     secrets: [githubToken, geminiApiKey],
+    cors: true, // Enable CORS for local development
   },
   githubProjectSuggestFlow,
 );

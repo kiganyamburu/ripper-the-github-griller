@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
+import { Functions } from '@angular/fire/functions';
+import { httpsCallable } from 'firebase/functions';
 import { FormsModule } from '@angular/forms';
 import { injectMutation } from '@tanstack/angular-query-experimental';
 import { SuggestCardComponent } from './suggest-card/suggest-card.component';
@@ -18,10 +19,13 @@ export class App {
 
   suggestMutations = injectMutation(() => ({
     mutationFn: async (username: string) => {
+      console.log('Calling Firebase Function with username:', username);
+      console.log('Functions instance:', this.functions);
       const callable = httpsCallable<{ username: string }, string>(
         this.functions,
         'githubProjectSuggestFunction',
       );
+      console.log('Callable function created:', callable);
       const result = await callable({ username });
       console.log('Suggestion result:', result);
       return result.data;
