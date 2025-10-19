@@ -9,6 +9,18 @@ enableFirebaseTelemetry();
 const githubToken = defineSecret('GITHUB_TOKEN');
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
+// In case only GEMINI_API_KEY is provided, map it to the env var expected by @genkit-ai/googleai
+if (!process.env.GOOGLE_GENAI_API_KEY && process.env.GEMINI_API_KEY) {
+  process.env.GOOGLE_GENAI_API_KEY = process.env.GEMINI_API_KEY;
+}
+
+// Helpful log in emulator if GitHub token is missing
+if (process.env.FUNCTIONS_EMULATOR && !process.env.GITHUB_TOKEN) {
+  console.warn(
+    '[genkit] Warning: GITHUB_TOKEN is not set. GitHub API calls may fail with 401/403 or hit low rate limits.',
+  );
+}
+
 const ai = genkit({
   plugins: [googleAI()],
   model: googleAI.model('gemini-2.5-flash'),

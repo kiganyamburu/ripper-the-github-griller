@@ -31,11 +31,12 @@
         "outputFileName": "index.js",
         "project": "apps/genkit/package.json",
         "tsConfig": "apps/genkit/tsconfig.json",
-        "assets": [],
+        "assets": ["apps/genkit/package.json"],
         "platform": "node",
-        "dependenciesFieldType": "dependencies",
+        "bundle": false,
         "thirdParty": false,
-        "generatePackageJson": true
+        "generatePackageJson": true,
+        "skipTypeCheck": false
       },
       "configurations": {
         "development": {
@@ -46,8 +47,26 @@
         }
       }
     },
+    "buildDev": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "main": "apps/genkit/src/index.ts",
+        "outputPath": "dist/apps/genkit",
+        "outputFileName": "index.js",
+        "project": "apps/genkit/package.json",
+        "tsConfig": "apps/genkit/tsconfig.dev.json",
+        "assets": ["apps/genkit/package.json"],
+        "platform": "node",
+        "bundle": false,
+        "thirdParty": false,
+        "minify": false,
+        "generatePackageJson": true,
+        "skipTypeCheck": false
+      }
+    },
     "serve": {
-      "command": "firebase emulators:start --only functions"
+      "command": "pwsh -File apps/genkit/serve.ps1"
     },
     "deploy": {
       "command": "firebase deploy --only functions"
