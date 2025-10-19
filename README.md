@@ -108,6 +108,3 @@ apps/
   genkit/           # Firebase Functions + Genkit flows
 ```
 
-## License
-
-MIT
